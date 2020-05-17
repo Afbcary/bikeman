@@ -7,6 +7,10 @@ import (
 	"unicode"
 )
 
+// reinstall environment
+// learn more about modules
+// install API client
+
 var scanner = bufio.NewScanner(os.Stdin)
 
 type Letter struct {
@@ -24,27 +28,36 @@ func main() {
 	loses := 0
 
 	wordIndex := 0
-	words := [2]string{"helena", "two"}
+	words := [2]string{"helena", "two"} // get word from twitter API?
 
 	greetUser()
 
-	switch input := getInput(); input {
-	case "q":
-		printRecord(wins, loses)
-		// TODO: Judge users success based on win %
-		os.Exit(0)
-	case "y":
-		fmt.Println("As you ride along, boulders, streams, tree branches, and other obstacles block your path. You must identify the obstacles in advance so you can avoid them.")
-		playGame(words[wordIndex])
-	case "v":
-		printRecord(wins, loses)
-	default:
-		greetUser()
+	for {
+		switch input := getInput(); input {
+		case "q":
+			printRecord(wins, loses)
+			// TODO: Judge users success based on win %
+			os.Exit(0)
+		case "y":
+			fmt.Println("As you ride along, boulders, streams, tree branches, and other obstacles block your path. You must identify the obstacles in advance so you can avoid them.")
+			if playGame(words[wordIndex]) {
+				wins++
+			} else {
+				loses++
+			}
+		case "v":
+			printRecord(wins, loses)
+		default:
+		}
+		fmt.Println("How about another pie?")
+		fmt.Println("y - pie time")
+		fmt.Println("v - print record")
+		fmt.Println("q - quit")
 	}
 }
 
 func printRecord(wins int, loses int) {
-	fmt.Printf("\nYou snacked on %d pies and lost %d bikes", wins, loses)
+	fmt.Printf("\nYou snacked on %d pies and lost %d bikes\n", wins, loses)
 }
 
 func greetUser() {
@@ -56,7 +69,6 @@ func greetUser() {
 }
 
 func playGame(word string) bool {
-
 	letters := make([]Letter, 0)
 
 	for _, char := range []byte(word) {
@@ -64,7 +76,7 @@ func playGame(word string) bool {
 	}
 
 	guessedBytes := make(map[byte]bool)
-	guessedString := ""
+	guessedString := "" // don't duplicate app state
 	remainingWheels := 10
 
 	for remainingWheels > 0 {
@@ -74,7 +86,7 @@ func playGame(word string) bool {
 		success := true
 		for i < len(letters) {
 			if letters[i].found {
-				partial += string(letters[i].char) + " "
+				partial += string(letters[i].char) + " " // lookup best way to do string concat
 			} else {
 				partial += "_ "
 				success = false
@@ -85,11 +97,10 @@ func playGame(word string) bool {
 			fmt.Println("You did it!")
 			return true
 		}
-		fmt.Printf("-------------\n%s\n-------------", partial)
-		fmt.Printf("%d guesses remaining. You've guessed: %s", remainingWheels, guessedString)
+		fmt.Printf("\n\n-------------\n%s\n-------------", partial)
+		fmt.Printf("\n%d guesses remaining. You've guessed: %s\n", remainingWheels, guessedString)
 
-		// bicycle picture
-		// add extra spacing between output
+		// bicycle picture string repeat and join
 		fmt.Println("\n Type a letter to guess it as an obstacle.")
 		fmt.Println("")
 
@@ -100,7 +111,7 @@ func playGame(word string) bool {
 		} else {
 			guess := byte(unicode.ToLower(rune([]byte(input)[0])))
 			if guessedBytes[guess] {
-				fmt.Printf("\n You already guessed %b", guess)
+				fmt.Printf("\n You already guessed %s", string(guess))
 			} else {
 				guessedBytes[guess] = true
 				correctGuess := false
@@ -114,10 +125,12 @@ func playGame(word string) bool {
 					i++
 				}
 				if !correctGuess {
-					remainingWheels -= 1
+					remainingWheels--
 				}
 			}
 		}
 	}
 	return false
 }
+
+// higher order function to print line before and after output
